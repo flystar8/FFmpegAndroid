@@ -2,7 +2,7 @@ package com.frank.live.param;
 
 
 /**
- * 音频相关参数
+ * Audio param Entity
  * Created by frank on 2018/1/28.
  */
 
@@ -13,10 +13,10 @@ public class AudioParam {
     private int numChannels;
 
     public AudioParam(int sampleRate, int channelConfig, int audioFormat, int numChannels) {
-        this.sampleRate = sampleRate;
+        this.sampleRate    = sampleRate;
         this.channelConfig = channelConfig;
-        this.audioFormat = audioFormat;
-        this.numChannels = numChannels;
+        this.audioFormat   = audioFormat;
+        this.numChannels   = numChannels;
     }
 
     public int getChannelConfig() {

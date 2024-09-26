@@ -1,72 +1,35 @@
 # FFmpegAndroid
-android端基于FFmpeg库的使用。<br>
-基于ffmpeg3.2.4版本，编译生成libffmpeg.so文件。<br>
-添加编译ffmpeg源码的参考脚本<br>
-目前音视频相关处理：<br>
 
-- #### 音频剪切、拼接
-- #### 音频混音
-- #### 音频转码
-- #### 音视频合成
-- #### 音频抽取
-- #### 音频解码播放
-- #### 音频编码
-- #### 视频抽取
-- #### 视频剪切
-- #### 视频转码
-- #### 视频截图
-- #### 视频降噪
-- #### 视频抽帧
-- #### 视频转GIF动图
-- #### 视频添加水印
-- #### 视频画面拼接
-- #### 视频反序倒播
-- #### 视频画中画
-- #### 图片合成视频
-- #### 视频解码播放
-- #### 本地直播推流
-- #### 实时直播推流
-- #### 音视频解码播放
-- #### OpenGL+GPUImage滤镜
-- #### FFmpeg的AVFilter滤镜
+### [FFmpeg官方文档](https://ffmpeg.org/)
+### [FFmpeg编译流程](https://github.com/xufuji456/FFmpegAndroid/blob/master/doc/FFmpeg_compile_shell.md)
+### [FFmpeg常用命令行](https://github.com/xufuji456/FFmpegAndroid/blob/master/doc/FFmpeg_command_line.md)
+### [FFmpeg源码分析](https://github.com/xufuji456/FFmpegAndroid/blob/master/doc/FFmpeg_sourcecode.md)
+### [JNI与NDK开发](https://github.com/xufuji456/FFmpegAndroid/blob/master/doc/JNI_develop_practice.md)
+### [音视频知识汇总](https://github.com/xufuji456/FFmpegAndroid/blob/master/doc/multimedia_knowledge.md)
+### [ijkplayer播放器架构](https://github.com/xufuji456/FFmpegAndroid/blob/master/doc/player_framework.md)
 
-- #### IjkPlayer的RTSP超低延时直播
-- #### IjkPlayer的RTSP多路投屏直播
+----------------------------------------------------------------------------------------------------
 
-左边是ffplay客户端拉流播放，中间是web网页播放：
+常见的流媒体传输协议包括：RTP、RTMP、RTCP、RTSP，流媒体应用协议有HLS、DASH，</br>
+WebRTC设计传输协议有SDP、SRTP、ICE、NAT、STUN等，常用视频编码协议有H264，</br>
+常用的视频封装格式有mp4，关于C/C++语言标准有C11、C20++等，书籍包括音视频编解码等。</br>
+详细列表可以查阅：[多媒体协议与书籍](https://github.com/xufuji456/FFmpegAndroid/blob/master/doc/multimedia_protocol.md)
 
-![动态图片](https://github.com/xufuji456/FFmpegAndroid/blob/master/gif/live.gif)
+音视频工作方向包括:直播、短视频、流媒体传输、视频播放器、音乐播放器、音视频算法、</br>
+流媒体后端、音视频编辑、图像处理(个人概括，具体方向不限于此)。</br>
+详情可查阅：[音视频工作方向](https://github.com/xufuji456/FFmpegAndroid/blob/master/doc/multimedia_work.md)
 
-视频添加文字水印（文字白色背景可以改为透明）：
+### 音视频基础知识:
+![preview](https://github.com/xufuji456/FFmpegAndroid/blob/master/picture/multimedia_baseline.png)
 
-![静态图片](https://github.com/xufuji456/FFmpegAndroid/blob/master/picture/water_mark.png)
+### 音视频进阶成长:
+![preview](https://github.com/xufuji456/FFmpegAndroid/blob/master/picture/multimedia_main.png)
 
-视频转成GIF动图：
+### 音视频开源库:
+![preview](https://github.com/xufuji456/FFmpegAndroid/blob/master/picture/multimedia_library.png)
 
-![动态图片](https://github.com/xufuji456/FFmpegAndroid/blob/master/gif/VideoToGif.gif)
+### 音视频教程: [一起学习音视频](https://ke.qq.com/course/5613182#term_id=105809583)
 
-滤镜效果：
-
-![静态图片](https://github.com/xufuji456/FFmpegAndroid/blob/master/picture/filter_balance.png)
-
-![静态图片](https://github.com/xufuji456/FFmpegAndroid/blob/master/picture/filter_sketch.png)
-
-![静态图片](https://github.com/xufuji456/FFmpegAndroid/blob/master/picture/filter_edge.png)
-
-![静态图片](https://github.com/xufuji456/FFmpegAndroid/blob/master/picture/filter_grid.png)
-
-视频画中画：
-
-![静态图片](https://github.com/xufuji456/FFmpegAndroid/blob/master/picture/picture_in_picture.png)
-
-视频画面拼接：
-
-![动态图片](https://github.com/xufuji456/FFmpegAndroid/blob/master/gif/horizontal.gif)
-
-视频倒播：
-
-![动态图片](https://github.com/xufuji456/FFmpegAndroid/blob/master/gif/reverse.gif)
-
-***
-<br><br>
+### Joining the group to learn FFmpeg:
+![preview](https://github.com/xufuji456/FFmpegAndroid/blob/master/picture/ffmpeg_group.png)
 

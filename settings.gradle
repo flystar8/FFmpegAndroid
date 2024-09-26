@@ -1,1 +1,5 @@
-include ':app', ':Live', ':OnLive'
+include ':AndroidMedia'
+include ':app'
+include ':Live'
+include ':libmp3'
+include ':CameraFilter'

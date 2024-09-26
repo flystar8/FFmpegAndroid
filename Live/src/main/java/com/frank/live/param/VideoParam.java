@@ -1,7 +1,7 @@
 package com.frank.live.param;
 
 /**
- * 视频相关参数
+ * Video param Entity
  * Created by frank on 2018/1/28.
  */
 
@@ -13,10 +13,10 @@ public class VideoParam {
     private int frameRate;
 
     public VideoParam(int width, int height, int cameraId, int bitRate, int frameRate) {
-        this.width = width;
-        this.height = height;
-        this.cameraId = cameraId;
-        this.bitRate = bitRate;
+        this.width     = width;
+        this.height    = height;
+        this.cameraId  = cameraId;
+        this.bitRate   = bitRate;
         this.frameRate = frameRate;
     }
 

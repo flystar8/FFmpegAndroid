@@ -23,3 +23,18 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
+
+-keep public class com.frank.ffmpeg.AudioPlayer {
+}
+
+-keep public class com.frank.ffmpeg.FFmpegCmd {
+}
+
+-keep public class com.frank.ffmpeg.FFmpegPusher {
+}
+
+-keep public class com.frank.ffmpeg.VideoPlayer {
+}

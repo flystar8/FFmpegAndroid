@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef CMDUTILS_H
-#define CMDUTILS_H
+#ifndef FFTOOLS_CMDUTILS_H
+#define FFTOOLS_CMDUTILS_H
 
 #include <stdint.h>
 
@@ -34,6 +34,10 @@
 #undef main /* We don't want SDL to override our main() */
 #endif
 
+#include <setjmp.h>
+
+extern jmp_buf jump_buf;
+
 /**
  * program name, defined by the program for show_version().
  */
@@ -44,11 +48,9 @@ extern const char program_name[];
  */
 extern const int program_birth_year;
 
-extern AVCodecContext *avcodec_opts[AVMEDIA_TYPE_NB];
-extern AVFormatContext *avformat_opts;
 extern AVDictionary *sws_dict;
 extern AVDictionary *swr_opts;
-extern AVDictionary *format_opts, *codec_opts, *resample_opts;
+extern AVDictionary *format_opts, *codec_opts;
 extern int hide_banner;
 
 /**
@@ -57,15 +59,26 @@ extern int hide_banner;
 void register_exit(void (*cb)(int ret));
 
 /**
- * Wraps exit with a program-specific cleanup routine.
+ * Reports an error corresponding to the provided
+ * AVERROR code and calls exit_program() with the
+ * corresponding POSIX error code.
+ * @note ret must be an AVERROR-value of a POSIX error code
+ *       (i.e. AVERROR(EFOO) and not AVERROR_FOO).
+ *       library functions can return both, so call this only
+ *       with AVERROR(EFOO) of your own.
  */
-int exit_program(int ret);
+void report_and_exit(int ret) av_noreturn;
 
 /**
- * Initialize the cmdutils option system, in particular
- * allocate the *_opts contexts.
+ * Wraps exit with a program-specific cleanup routine.
  */
-void init_opts(void);
+void exit_program(int ret) av_noreturn;
+
+/**
+ * Initialize dynamic library loading
+ */
+void init_dynload(void);
+
 /**
  * Uninitialize the cmdutils option system, in particular
  * free the *_opts contexts and their contents.
@@ -79,32 +92,10 @@ void uninit_opts(void);
 void log_callback_help(void* ptr, int level, const char* fmt, va_list vl);
 
 /**
- * Override the cpuflags.
- */
-int opt_cpuflags(void *optctx, const char *opt, const char *arg);
-
-/**
  * Fallback for options that are not explicitly handled, these will be
  * parsed through AVOptions.
  */
 int opt_default(void *optctx, const char *opt, const char *arg);
-
-/**
- * Set the libav* libraries log level.
- */
-int opt_loglevel(void *optctx, const char *opt, const char *arg);
-
-int opt_report(const char *opt);
-
-int opt_max_alloc(void *optctx, const char *opt, const char *arg);
-
-int opt_codec_debug(void *optctx, const char *opt, const char *arg);
-
-#if CONFIG_OPENCL
-int opt_opencl(void *optctx, const char *opt, const char *arg);
-
-int opt_opencl_bench(void *optctx, const char *opt, const char *arg);
-#endif
 
 /**
  * Limit the execution time.
@@ -150,6 +141,7 @@ typedef struct SpecifierOpt {
         uint8_t *str;
         int        i;
         int64_t  i64;
+        uint64_t ui64;
         float      f;
         double   dbl;
     } u;
@@ -214,11 +206,6 @@ void show_help_children(const AVClass *class, int flags);
 void show_help_default(const char *opt, const char *arg);
 
 /**
- * Generic -h handler common to all fftools.
- */
-int show_help(void *optctx, const char *opt, const char *arg);
-
-/**
  * Parse the command line arguments.
  *
  * @param optctx an opaque options context
@@ -276,7 +263,6 @@ typedef struct OptionGroup {
 
     AVDictionary *codec_opts;
     AVDictionary *format_opts;
-    AVDictionary *resample_opts;
     AVDictionary *sws_dict;
     AVDictionary *swr_opts;
 } OptionGroup;
@@ -373,7 +359,7 @@ int check_stream_specifier(AVFormatContext *s, AVStream *st, const char *spec);
  * @return a pointer to the created dictionary
  */
 AVDictionary *filter_codec_opts(AVDictionary *opts, enum AVCodecID codec_id,
-                                AVFormatContext *s, AVStream *st, AVCodec *codec);
+                                AVFormatContext *s, AVStream *st, const AVCodec *codec);
 
 /**
  * Setup AVCodecContext options for avformat_find_stream_info().
@@ -383,8 +369,8 @@ AVDictionary *filter_codec_opts(AVDictionary *opts, enum AVCodecID codec_id,
  * Each dictionary will contain the options from codec_opts which can
  * be applied to the corresponding stream codec context.
  *
- * @return pointer to the created array of dictionaries, NULL if it
- * cannot be created
+ * @return pointer to the created array of dictionaries.
+ * Calls exit() on failure.
  */
 AVDictionary **setup_find_stream_info_opts(AVFormatContext *s,
                                            AVDictionary *codec_opts);
@@ -406,122 +392,6 @@ void print_error(const char *filename, int err);
  * the program.
  */
 void show_banner(int argc, char **argv, const OptionDef *options);
-
-/**
- * Print the version of the program to stdout. The version message
- * depends on the current versions of the repository and of the libav*
- * libraries.
- * This option processing function does not utilize the arguments.
- */
-int show_version(void *optctx, const char *opt, const char *arg);
-
-/**
- * Print the build configuration of the program to stdout. The contents
- * depend on the definition of FFMPEG_CONFIGURATION.
- * This option processing function does not utilize the arguments.
- */
-int show_buildconf(void *optctx, const char *opt, const char *arg);
-
-/**
- * Print the license of the program to stdout. The license depends on
- * the license of the libraries compiled into the program.
- * This option processing function does not utilize the arguments.
- */
-int show_license(void *optctx, const char *opt, const char *arg);
-
-/**
- * Print a listing containing all the formats supported by the
- * program (including devices).
- * This option processing function does not utilize the arguments.
- */
-int show_formats(void *optctx, const char *opt, const char *arg);
-
-/**
- * Print a listing containing all the devices supported by the
- * program.
- * This option processing function does not utilize the arguments.
- */
-int show_devices(void *optctx, const char *opt, const char *arg);
-
-#if CONFIG_AVDEVICE
-/**
- * Print a listing containing audodetected sinks of the output device.
- * Device name with options may be passed as an argument to limit results.
- */
-int show_sinks(void *optctx, const char *opt, const char *arg);
-
-/**
- * Print a listing containing audodetected sources of the input device.
- * Device name with options may be passed as an argument to limit results.
- */
-int show_sources(void *optctx, const char *opt, const char *arg);
-#endif
-
-/**
- * Print a listing containing all the codecs supported by the
- * program.
- * This option processing function does not utilize the arguments.
- */
-int show_codecs(void *optctx, const char *opt, const char *arg);
-
-/**
- * Print a listing containing all the decoders supported by the
- * program.
- */
-int show_decoders(void *optctx, const char *opt, const char *arg);
-
-/**
- * Print a listing containing all the encoders supported by the
- * program.
- */
-int show_encoders(void *optctx, const char *opt, const char *arg);
-
-/**
- * Print a listing containing all the filters supported by the
- * program.
- * This option processing function does not utilize the arguments.
- */
-int show_filters(void *optctx, const char *opt, const char *arg);
-
-/**
- * Print a listing containing all the bit stream filters supported by the
- * program.
- * This option processing function does not utilize the arguments.
- */
-int show_bsfs(void *optctx, const char *opt, const char *arg);
-
-/**
- * Print a listing containing all the protocols supported by the
- * program.
- * This option processing function does not utilize the arguments.
- */
-int show_protocols(void *optctx, const char *opt, const char *arg);
-
-/**
- * Print a listing containing all the pixel formats supported by the
- * program.
- * This option processing function does not utilize the arguments.
- */
-int show_pix_fmts(void *optctx, const char *opt, const char *arg);
-
-/**
- * Print a listing containing all the standard channel layouts supported by
- * the program.
- * This option processing function does not utilize the arguments.
- */
-int show_layouts(void *optctx, const char *opt, const char *arg);
-
-/**
- * Print a listing containing all the sample formats supported by the
- * program.
- */
-int show_sample_fmts(void *optctx, const char *opt, const char *arg);
-
-/**
- * Print a listing containing all the color names and values recognized
- * by the program.
- */
-int show_colors(void *optctx, const char *opt, const char *arg);
 
 /**
  * Return a positive value if a line read from standard input
@@ -562,13 +432,31 @@ FILE *get_preset_file(char *filename, size_t filename_size,
  */
 void *grow_array(void *array, int elem_size, int *size, int new_size);
 
-#define media_type_string av_get_media_type_string
+/**
+ * Atomically add a new element to an array of pointers, i.e. allocate
+ * a new entry, reallocate the array of pointers and make the new last
+ * member of this array point to the newly allocated buffer.
+ * Calls exit() on failure.
+ *
+ * @param array     array of pointers to reallocate
+ * @param elem_size size of the new element to allocate
+ * @param nb_elems  pointer to the number of elements of the array array;
+ *                  *nb_elems will be incremented by one by this function.
+ * @return pointer to the newly allocated entry
+ */
+void *allocate_array_elem(void *array, size_t elem_size, int *nb_elems);
 
 #define GROW_ARRAY(array, nb_elems)\
     array = grow_array(array, sizeof(*array), &nb_elems, nb_elems + 1)
 
+#define ALLOC_ARRAY_ELEM(array, nb_elems)\
+    allocate_array_elem(&array, sizeof(*array[0]), &nb_elems)
+
 #define GET_PIX_FMT_NAME(pix_fmt)\
     const char *name = av_get_pix_fmt_name(pix_fmt);
+
+#define GET_CODEC_NAME(id)\
+    const char *name = avcodec_descriptor_get(id)->name;
 
 #define GET_SAMPLE_FMT_NAME(sample_fmt)\
     const char *name = av_get_sample_fmt_name(sample_fmt)
@@ -577,14 +465,6 @@ void *grow_array(void *array, int elem_size, int *size, int new_size);
     char name[16];\
     snprintf(name, sizeof(name), "%d", rate);
 
-#define GET_CH_LAYOUT_NAME(ch_layout)\
-    char name[16];\
-    snprintf(name, sizeof(name), "0x%"PRIx64, ch_layout);
+double get_rotation(int32_t *displaymatrix);
 
-#define GET_CH_LAYOUT_DESC(ch_layout)\
-    char name[128];\
-    av_get_channel_layout_string(name, sizeof(name), 0, ch_layout);
-
-double get_rotation(AVStream *st);
-
-#endif /* CMDUTILS_H */
+#endif /* FFTOOLS_CMDUTILS_H */
